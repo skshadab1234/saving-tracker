@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saving Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Additional styles for summary */
+        #summary {
+            background-color: #d4edda;
+            /* Light green background */
+            border: 1px solid #c3e6cb;
+            /* Green border */
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            font-size: 1.2rem;
+            /* Larger font size */
+            font-weight: bold;
+            /* Bold text */
+        }
+
+        .loading {
+            background-color: #4caf50;
+            /* Green */
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* Additional styles for table */
+        th,
+        td {
+            padding: 12px;
+        }
+    </style>
+</head>
+
+<body class="bg-blue-50">
+    <div class="md:container mx-auto max-w-lg p-6 bg-white rounded-lg shadow-lg mt-10">
+        <h2 class="text-2xl font-semibold text-center text-gray-800">Saving Tracker</h2>
+        <form id="savingsForm" class="space-y-4 mt-6">
+            <div class="grid md:grid-cols-2 gap-5">
+                <label class="block">
+                    <span class="text-gray-700">Start Month:</span>
+                    <input type="date" id="startDate" required
+                        class="mt-1 block w-full p-2 border rounded-md border-gray-300 focus:outline-none focus:ring focus:ring-blue-500">
+                </label>
+                <label class="block">
+                    <span class="text-gray-700">Monthly Income:</span>
+                    <input type="number" id="monthlyIncome" required
+                        class="mt-1 block w-full p-2 border rounded-md border-gray-300 focus:outline-none focus:ring focus:ring-blue-500">
+                </label>
+                <label class="block">
+                    <span class="text-gray-700">Average Monthly Expense:</span>
+                    <input type="number" id="monthlyExpense" required
+                        class="mt-1 block w-full p-2 border rounded-md border-gray-300 focus:outline-none focus:ring focus:ring-blue-500">
+                </label>
+                <label class="block">
+                    <span class="text-gray-700">Increment Frequency:</span>
+                    <select id="incrementFrequency"
+                        class="mt-1 block w-full p-2 border rounded-md border-gray-300 focus:outline-none focus:ring focus:ring-blue-500">
+                        <option value="6">Every 6 months</option>
+                        <option value="12">Every year</option>
+                    </select>
+                </label>
+                <label class="block">
+                    <span class="text-gray-700">Average Increment Amount:</span>
+                    <input type="number" id="incrementAmount" required
+                        class="mt-1 block w-full p-2 border rounded-md border-gray-300 focus:outline-none focus:ring focus:ring-blue-500">
+                </label>
+                <label class="block">
+                    <span class="text-gray-700">Duration (years):</span>
+                    <select id="duration"
+                        class="mt-1 block w-full p-2 border rounded-md border-gray-300 focus:outline-none focus:ring focus:ring-blue-500">
+                        <option value="1">1 year</option>
+                        <option value="2">2 years</option>
+                        <option value="3">3 years</option>
+                        <option value="4">4 years</option>
+                        <option value="5">5 years</option>
+                        <option value="6">6 years</option>
+                        <option value="7">7 years</option>
+                    </select>
+                </label>
+                <label class="block">
+                    <span class="text-gray-700">Increment Month:</span>
+                    <select id="incrementMonth"
+                        class="mt-1 block w-full p-2 border rounded-md border-gray-300 focus:outline-none focus:ring focus:ring-blue-500">
+                        <option value="0">January</option>
+                        <option value="1">February</option>
+                        <option value="2">March</option>
+                        <option value="3">April</option>
+                        <option value="4">May</option>
+                        <option value="5">June</option>
+                        <option value="6">July</option>
+                        <option value="7">August</option>
+                        <option value="8">September</option>
+                        <option value="9">October</option>
+                        <option value="10">November</option>
+                        <option value="11">December</option>
+                    </select>
+                </label>
+            </div>
+            <button type="button" id="calculateButton" onclick="calculateSavings()"
+                class="w-full py-2 mt-4 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition">Calculate
+                Savings</button>
+        </form>
+
+        <div id="summary" class="summary mt-6"></div>
+
+        <table id="resultTable" class="mt-6 w-full border border-gray-300 rounded-md">
+            <thead>
+                <tr class="bg-green-500 text-white">
+                    <th class="border border-gray-300">Month</th>
+                    <th class="border border-gray-300">Total Income (₹)</th>
+                    <th class="border border-gray-300">Total Savings (₹)</th>
+                    <th class="border border-gray-300">Monthly Expense (₹)</th>
+                </tr>
+            </thead>
+            <tbody id="resultBody">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function validateInputs() {
+            const monthlyIncome = document.getElementById('monthlyIncome').value;
+            const monthlyExpense = document.getElementById('monthlyExpense').value;
+            const incrementAmount = document.getElementById('incrementAmount').value;
+            const durationYears = document.getElementById('duration').value;
+            const startDate = document.getElementById('startDate').value;
+
+            return monthlyIncome && monthlyExpense && incrementAmount && durationYears && startDate;
+        }
+
+        function calculateSavings() {
+            if (!validateInputs()) {
+                alert("Please fill in all fields with valid values.");
+                return;
+            }
+
+            const monthlyIncome = parseFloat(document.getElementById('monthlyIncome').value);
+            const monthlyExpense = parseFloat(document.getElementById('monthlyExpense').value);
+            const incrementAmount = parseFloat(document.getElementById('incrementAmount').value);
+            const incrementFrequency = parseInt(document.getElementById('incrementFrequency').value);
+            const durationYears = parseInt(document.getElementById('duration').value);
+            const startDate = new Date(document.getElementById('startDate').value);
+            const incrementMonth = parseInt(document.getElementById('incrementMonth').value);
+
+            const calculateButton = document.getElementById("calculateButton");
+            calculateButton.classList.add("loading");
+            calculateButton.disabled = true;
+
+            setTimeout(() => {
+                let currentIncome = monthlyIncome;
+                let currentExpense = monthlyExpense;
+                const months = durationYears * 12;
+
+                let totalIncome = 0;
+                let totalSavings = 0;
+                const resultBody = document.getElementById('resultBody');
+                resultBody.innerHTML = '';
+
+                let yearIncome = 0;
+                let yearSavings = 0;
+                let yearExpense = 0;
+
+                for (let month = 0; month < months; month++) {
+                    if (month % incrementFrequency === 0 && month !== 0 && (startDate.getMonth() + month) % 12 === incrementMonth) {
+                        currentIncome += incrementAmount;
+                        currentExpense += incrementAmount;
+                    }
+
+                    totalIncome += currentIncome;
+                    const monthlySaving = currentIncome - currentExpense;
+                    totalSavings += monthlySaving;
+                    yearIncome += currentIncome;
+                    yearSavings += monthlySaving;
+                    yearExpense += currentExpense;
+
+                    const date = new Date(startDate);
+                    date.setMonth(startDate.getMonth() + month);
+                    const monthName = date.toLocaleString("en-US", { month: "short" });
+                    const year = date.getFullYear();
+                    const displayMonth = `${monthName} ${year}`;
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="border border-gray-300">${displayMonth}</td>
+                        <td class="border border-gray-300">₹${currentIncome.toLocaleString("en-IN")}</td>
+                        <td class="border border-gray-300">₹${totalSavings.toLocaleString("en-IN")}</td>
+                        <td class="border border-gray-300">₹${currentExpense.toLocaleString("en-IN")}</td>
+                    `;
+                    resultBody.appendChild(row);
+
+                    // Add yearly summary at the end of each year
+                    if ((month + 1) % 12 === 0) {
+                        const summaryRow = document.createElement('tr');
+                        summaryRow.innerHTML = `
+                            <td class="border border-gray-300 font-bold bg-gray-200">Year ${year}</td>
+                            <td class="border border-gray-300 font-bold bg-gray-200">₹${yearIncome.toLocaleString("en-IN")}</td>
+                            <td class="border border-gray-300 font-bold bg-gray-200">₹${yearSavings.toLocaleString("en-IN")}</td>
+                            <td class="border border-gray-300 font-bold bg-gray-200">₹${yearExpense.toLocaleString("en-IN")}</td>
+                        `;
+                        resultBody.appendChild(summaryRow);
+
+                        // Reset yearly calculations
+                        yearIncome = 0;
+                        yearSavings = 0;
+                        yearExpense = 0;
+                    }
+                }
+
+                // Summary section
+                const summary = document.getElementById('summary');
+                summary.innerHTML = `
+                    <p>Total Income Over ${durationYears} Years: ₹${totalIncome.toLocaleString("en-IN")}</p>
+                    <p>Total Savings Over ${durationYears} Years: ₹${totalSavings.toLocaleString("en-IN")}</p>
+                `;
+
+                calculateButton.classList.remove("loading");
+                calculateButton.disabled = false;
+            }, 500);
+        }
+    </script>
+</body>
+
+</html>
